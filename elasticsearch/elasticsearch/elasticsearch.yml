@@ -1,0 +1,5 @@
+######################### ElasticSearch Configuration  ########################
+
+# cluster
+cluster.name: aurum
+network.host: 0.0.0.0

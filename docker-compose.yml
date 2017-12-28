@@ -15,20 +15,8 @@
 version: '3'
 services:
   elasticsearch:
-    image: elasticsearch:2.3.3
-    # volumes:
-    #   - $PWD/data/elasticsearch:/usr/share/elasticsearch/data
-    # environment:
-    #         - cluster.name=Docker-elasticsearch
-    #         - node.name="ES-node"
-    #         - http.host=0.0.0.0
-    #         - transport.host=0.0.0.0        
-    #         - network.publish_host=127.0.0.1
-    #         - transport.tcp.port=9300
-    #         - transport.publish_port=9200
-    #         # - discovery.type=single-node
-    #         # - xpack.security.enabled=false
-    #         - client.transport.sniff=true
+    build:
+      context: elasticsearch
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -45,6 +33,28 @@ services:
     ports:
       - "3000:3000"
       - "5000:5000"
+    environment:
+      - bootstrap.memory_lock=false # reservations below takes care of that
+      - "ES_JAVA_OPTS=
+          -Xms700m
+          -Xmx700m
+          -Xss256k
+          -server
+          -Djava.net.preferIPv4Stack=true
+          -XX:+UseParNewGC
+          -XX:+UseConcMarkSweepGC
+          -XX:CMSInitiatingOccupancyFraction=75
+          -XX:+UseCMSInitiatingOccupancyOnly
+          -XX:+HeapDumpOnOutOfMemoryError
+        "
+      - ES_HOME=/usr/local/elasticsearch
+    ulimits: # ignored in swarm mode
+      memlock: # reservations below takes care of that
+         soft: -1
+         hard: -1
+      nofile:
+          soft: 65536
+          hard: 65536
   profiler:
     depends_on:
       - elasticsearch
@@ -74,3 +84,6 @@ services:
       - $PWD/data/models
     ports:
       - "8888:8888"
+      dockerfile: docker/Dockerfile-ddprofiler
+
+
